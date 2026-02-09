@@ -2,24 +2,34 @@
 
 1. Clone the repository
 
-2. Create a `.env` file in the root directory
-
-3. Copy the content from `.env.example`:
+2. Configure backend environment variables:
    ```bash
-   cp .env.example .env
+   cp backend/.env.example backend/.env
+   ```
 
-4.Fill in your actual credentials in the .env file
+3. Update values in `backend/.env` with your real credentials.
 
-5.Run the app :
+4. Configure frontend environment variables:
+   ```bash
+   cp frontend/.env.example frontend/.env
+   ```
 
-Frontend:
-In the terminal,
+5. Install dependencies:
+   ```bash
+   cd backend && npm install
+   cd ../frontend && npm install
+   ```
 
-cd frontend
-npm run dev
+6. Run the app.
 
-Backend:
-In new terminal,
-
+Backend (terminal 1):
+```bash
 cd backend
 npx nodemon
+```
+
+Frontend (terminal 2):
+```bash
+cd frontend
+npm run dev
+```

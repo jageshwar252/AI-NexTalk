@@ -20,7 +20,7 @@ export const createProject = async (req, res) => {
         });
     }
     catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(400).send(error.message);
     }
 }
@@ -34,7 +34,7 @@ export const getAllProject = async (req, res) => {
             projects: allProjects,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(400).send(error.message);
     }
 }
@@ -58,7 +58,7 @@ export const addUserToProject = async (req, res) => {
             project,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(400).send(error.message);
     }
 }
@@ -67,14 +67,13 @@ export const getProjectByIdController = async (req, res) => {
     const { projectId } = req.params;
     try{
         const project = await projectService.getProjectById({projectId});
-        console.log(project);
         return res.status(200).json({
             message: 'Project fetched successfully',
             project,
         });
     }
     catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(400).send(error.message);
     }
 }

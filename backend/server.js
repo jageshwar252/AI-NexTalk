@@ -37,7 +37,7 @@ io.use(async(socket,next)=>{
         next();
     }
     catch(error){
-        console.log(error);
+        console.error(error);
         return next(new Error("Authentication error"));
     }
 })
@@ -45,15 +45,13 @@ io.use(async(socket,next)=>{
 io.on('connection', socket => {
 
     socket.roomId = socket.project._id.toString()
-
-    console.log('New client connected');
     socket.join(socket.roomId);
 
     socket.on('project-message',async data =>{
-        const message = data.message;
-        const aiIsPresentInMessage = message.includes('@ai')|| message.includes('@aI') || message.includes('@AI')|| message.includes('@Ai');
+        const message = data?.message || "";
+        const aiIsPresentInMessage = /@ai/i.test(message);
         if(aiIsPresentInMessage){
-            const prompt = message.replace('@ai', '').trim()|| message.replace('@aI', '').trim()|| message.replace('@AI', '').trim()|| message.replace('@Ai', '').trim();
+            const prompt = message.replace(/@ai/i, '').trim();
             const result = await generateResult(prompt);
             socket.broadcast.to(socket.roomId).emit('project-message',data)
             io.to(socket.roomId).emit('project-message', {
@@ -68,7 +66,6 @@ io.on('connection', socket => {
 
     socket.on('event', data => { /* … */ });
     socket.on('disconnect', () => {
-        console.log('Client disconnected');
         socket.leave(socket.roomId);
      });
 });

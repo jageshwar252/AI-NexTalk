@@ -4,8 +4,8 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 // Get the model
 const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
-  generationconfig: {
+  model: "gemini-3-flash-preview",
+  generationConfig: {
     responseMimeType: "application/json",
   },
   systemInstruction: `You are a senior MERN stack developer with 10+ years of experience. You write clean, modular, and scalable code that follows industry best practices. Your code includes meaningful comments, handles edge cases gracefully, and avoids runtime errors. Write code as if it were going into production.Also keep it short unless the user asks for something in detail.Always give a valid file tree structure without using any backticks in content field.
@@ -53,9 +53,9 @@ export const generateResult = async (prompt) => {
   } catch (error) {
     if (error.status === 503) {
       // Handle model overload gracefully
-      return { message: "AI service is temporarily unavailable. Please try again later." };
+      return JSON.stringify({ text: "AI service is temporarily unavailable. Please try again later." });
     }
     // Handle other errors
-    return { message: "An error occurred while processing your request." };
+    return JSON.stringify({ text: "An error occurred while processing your request." });
   }
 };

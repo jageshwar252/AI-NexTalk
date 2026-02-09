@@ -1,16 +1,15 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from '../config/axios';
-
-// Create the UserContext
-export const UserContext = createContext();
+import { UserContext } from './user-context';
 
 // Create a provider component
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [isBootstrapping, setIsBootstrapping] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        if (token && !user) {
+        if (token) {
             axios.get('/users/profile', {
                 headers: { Authorization: `Bearer ${token}` }
             })
@@ -20,12 +19,17 @@ export const UserProvider = ({ children }) => {
             .catch(() => {
                 setUser(null);
                 localStorage.removeItem('token');
+            })
+            .finally(() => {
+                setIsBootstrapping(false);
             });
+            return;
         }
+        setIsBootstrapping(false);
     }, []);
 
     return (
-        <UserContext.Provider value={{ user, setUser }}>
+        <UserContext.Provider value={{ user, setUser, isBootstrapping }}>
             {children}
         </UserContext.Provider>
     );

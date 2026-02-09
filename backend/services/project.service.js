@@ -38,7 +38,7 @@ export const addUsersToProject = async ({projectId,users,userId}) => {
         throw new Error("Invalid Project ID");
     }
 
-    if (!Array.isArray(users) || !users.some(userId => mongoose.Types.ObjectId.isValid(userId))) {
+    if (!Array.isArray(users) || !users.every((candidateId) => mongoose.Types.ObjectId.isValid(candidateId))) {
         throw new Error("Invalid User IDs in the array");
     }
     if (!users || users.length === 0) {

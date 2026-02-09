@@ -1,34 +1,26 @@
-import React, { useContext, useEffect} from 'react'
-import { UserContext } from '../context/user.context'
-import { useNavigate } from 'react-router-dom'
+import React, { useContext } from 'react'
+import { UserContext } from '../context/user-context'
+import { Navigate } from 'react-router-dom'
 
 const UserAuth = ({ children }) => {
+    const { user, isBootstrapping } = useContext(UserContext)
 
-    const { user } = useContext(UserContext)
-    const[loading, setLoading] = React.useState(true)
-    const token = localStorage.getItem('token')
-    const navigate = useNavigate()
+    if (isBootstrapping) {
+        return (
+            <div className="min-h-screen grid place-items-center bg-slate-950 text-slate-200">
+                <p className="text-sm tracking-wide">Loading workspace...</p>
+            </div>
+        )
+    }
 
-    useEffect(()=>{
-        if(user){
-            setLoading(false)
-        }
-        if(!token){
-            navigate('/login')
-        }
-        if(!user){
-            navigate('/login')
-        }
-    },[])
-
-    if(loading){
-        return <div>Loading...</div>
+    if (!user) {
+        return <Navigate to="/login" replace />
     }
 
     return (
-        <div>
+        <>
             {children}
-        </div>
+        </>
     )
 }
 

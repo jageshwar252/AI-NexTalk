@@ -42,7 +42,6 @@ export const loginUserController = async (req, res) => {
 }
 
 export const profileController = async (req, res) => {
-    console.log(req.user);
     res.status(200).json({user:req.user});
 }
 
@@ -54,7 +53,7 @@ export const logoutController = async (req, res) => {
         res.status(200).json({ message: 'Logged out successfully' });
     }
     catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(400).json({ message: error.message });
     }
 }
@@ -69,6 +68,6 @@ export const getAllUsersController = async (req, res) => {
 
     }
     catch(err){
-        res.sendStatus(400).json({message:err.message});
+        return res.status(400).json({message:err.message});
     }
 }
