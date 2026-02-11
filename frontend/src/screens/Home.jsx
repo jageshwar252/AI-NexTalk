@@ -15,10 +15,38 @@ const Home = () => {
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const getProjectTime = (project) => {
+    const createdAt = project?.createdAt ? new Date(project.createdAt) : null;
+    if (createdAt && !Number.isNaN(createdAt.getTime())) {
+      return createdAt.getTime();
+    }
+
+    if (typeof project?._id === 'string' && project._id.length >= 8) {
+      const seconds = parseInt(project._id.substring(0, 8), 16);
+      if (!Number.isNaN(seconds)) return seconds * 1000;
+    }
+
+    return 0;
+  };
+
+  const formatProjectDate = (project) => {
+    const createdAt = project?.createdAt ? new Date(project.createdAt) : null;
+    if (createdAt && !Number.isNaN(createdAt.getTime())) {
+      return createdAt.toLocaleDateString();
+    }
+
+    if (typeof project?._id === 'string' && project._id.length >= 8) {
+      const seconds = parseInt(project._id.substring(0, 8), 16);
+      if (!Number.isNaN(seconds)) {
+        return new Date(seconds * 1000).toLocaleDateString();
+      }
+    }
+
+    return 'Recently';
+  };
+
   const sortedProjects = useMemo(() => {
-    return [...projects].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    return [...projects].sort((a, b) => getProjectTime(b) - getProjectTime(a));
   }, [projects]);
 
   const fetchProjects = async () => {
@@ -77,18 +105,18 @@ const Home = () => {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.18),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(34,197,94,0.16),transparent_26%),radial-gradient(circle_at_80%_80%,rgba(244,114,182,0.14),transparent_26%)]" />
+    <main className="relative min-h-screen overflow-hidden bg-[#06353b] text-[#ecf3f3]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(9,97,106,0.45),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(13,140,149,0.4),transparent_26%),radial-gradient(circle_at_80%_80%,rgba(26,180,181,0.36),transparent_26%)]" />
 
       <section className="relative mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-8">
-        <header className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:p-6">
+        <header className="rounded-2xl border border-[#d3d3d366] bg-[#0a4d55cc] p-5 backdrop-blur-xl sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-cyan-300/80">AI NexTalk</p>
-              <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">
+              <p className="text-xs uppercase tracking-[0.25em] text-[#d3d3d3]">AI NexTalk</p>
+              <h1 className="mt-2 text-2xl font-semibold text-[#f7f9f9] sm:text-3xl">
                 Welcome, {user?.email}
               </h1>
-              <p className="mt-2 text-sm text-slate-300">
+              <p className="mt-2 text-sm text-[#d7e4e5]">
                 Create or open a workspace to collaborate with your team and AI.
               </p>
             </div>
@@ -96,14 +124,14 @@ const Home = () => {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="rounded-xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                className="rounded-xl bg-[#1ab3b5] px-4 py-2 text-sm font-semibold text-[#053137] transition hover:bg-[#24c2c5]"
               >
                 New Project
               </button>
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold transition hover:bg-white/10 disabled:opacity-60"
+                className="rounded-xl border border-[#d3d3d388] px-4 py-2 text-sm font-semibold transition hover:bg-[#d3d3d322] disabled:opacity-60"
               >
                 {isLoggingOut ? 'Logging out...' : 'Logout'}
               </button>
@@ -112,17 +140,17 @@ const Home = () => {
         </header>
 
         {error && (
-          <div className="rounded-xl border border-rose-400/40 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">
+          <div className="rounded-xl border border-[#d3d3d366] bg-[#d3d3d322] px-4 py-3 text-sm text-[#e8efef]">
             {error}
           </div>
         )}
 
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white sm:text-xl">Your Projects</h2>
+            <h2 className="text-lg font-semibold text-[#f7f9f9] sm:text-xl">Your Projects</h2>
             <button
               onClick={fetchProjects}
-              className="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-white/10"
+              className="rounded-lg border border-[#d3d3d388] px-3 py-1.5 text-xs font-medium text-[#e4eded] transition hover:bg-[#d3d3d322]"
             >
               Refresh
             </button>
@@ -133,12 +161,12 @@ const Home = () => {
               {[...Array(4)].map((_, idx) => (
                 <div
                   key={idx}
-                  className="h-28 animate-pulse rounded-2xl border border-white/10 bg-white/5"
+                  className="h-28 animate-pulse rounded-2xl border border-[#d3d3d355] bg-[#d3d3d322]"
                 />
               ))}
             </div>
           ) : sortedProjects.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-8 text-center text-slate-300">
+            <div className="rounded-2xl border border-dashed border-[#d3d3d388] bg-[#d3d3d322] p-8 text-center text-[#dfe9ea]">
               No projects yet. Create your first project to get started.
             </div>
           ) : (
@@ -155,16 +183,16 @@ const Home = () => {
                       },
                     })
                   }
-                  className="group rounded-2xl border border-white/10 bg-white/5 p-5 text-left transition hover:-translate-y-0.5 hover:border-cyan-300/40 hover:bg-white/10"
+                  className="group rounded-2xl border border-[#d3d3d355] bg-[#0c4c53cc] p-5 text-left transition hover:-translate-y-0.5 hover:border-[#1ab3b5aa] hover:bg-[#d3d3d322]"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <h3 className="line-clamp-1 text-lg font-semibold text-white">{project.name}</h3>
-                    <span className="rounded-md bg-cyan-400/20 px-2 py-1 text-[11px] font-medium text-cyan-200">
+                    <h3 className="line-clamp-1 text-lg font-semibold text-[#f7f9f9]">{project.name}</h3>
+                    <span className="rounded-md bg-[#1ab3b533] px-2 py-1 text-[11px] font-medium text-[#def4f4]">
                       Open
                     </span>
                   </div>
-                  <p className="mt-3 text-sm text-slate-300">
-                    Created on {new Date(project.createdAt).toLocaleDateString()}
+                  <p className="mt-3 text-sm text-[#d9e7e7]">
+                    Created on {formatProjectDate(project)}
                   </p>
                 </button>
               ))}
@@ -174,10 +202,10 @@ const Home = () => {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-40 grid place-items-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900/90 p-6 shadow-2xl">
-            <h2 className="text-xl font-semibold text-white">Create Project</h2>
-            <p className="mt-2 text-sm text-slate-300">Give your workspace a clear, memorable name.</p>
+        <div className="fixed inset-0 z-40 grid place-items-center bg-[#072b30cc] p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-[#d3d3d355] bg-[#0a4a52f2] p-6 shadow-2xl">
+            <h2 className="text-xl font-semibold text-[#f7f9f9]">Create Project</h2>
+            <p className="mt-2 text-sm text-[#d8e5e6]">Give your workspace a clear, memorable name.</p>
 
             <form onSubmit={handleCreateProject} className="mt-5 space-y-4">
               <input
@@ -185,21 +213,21 @@ const Home = () => {
                 onChange={(e) => setProjectName(e.target.value)}
                 type="text"
                 placeholder="e.g. Agentic Task Board"
-                className="w-full rounded-xl border border-white/15 bg-slate-900 px-4 py-2.5 text-sm text-white outline-none transition focus:border-cyan-300/60 focus:ring-2 focus:ring-cyan-400/20"
+                className="w-full rounded-xl border border-[#d3d3d388] bg-[#083c43] px-4 py-2.5 text-sm text-[#eff6f6] outline-none transition focus:border-[#1ab3b5] focus:ring-2 focus:ring-[#1ab3b555]"
                 required
               />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="rounded-lg border border-white/20 px-4 py-2 text-sm text-slate-200 transition hover:bg-white/10"
+                  className="rounded-lg border border-[#d3d3d388] px-4 py-2 text-sm text-[#e3eded] transition hover:bg-[#d3d3d322]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isCreatingProject}
-                  className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
+                  className="rounded-lg bg-[#1ab3b5] px-4 py-2 text-sm font-semibold text-[#053137] transition hover:bg-[#24c2c5] disabled:opacity-60"
                 >
                   {isCreatingProject ? 'Creating...' : 'Create'}
                 </button>

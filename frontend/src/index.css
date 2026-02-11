@@ -2,6 +2,11 @@
 
 :root {
   --surface-blur: 18px;
+  --tone-deep: #09616a;
+  --tone-mid: #0d8c95;
+  --tone-bright: #1ab3b5;
+  --tone-soft: #d3d3d3;
+  --tone-ink: #062f34;
 }
 
 * {
@@ -17,7 +22,12 @@ body,
 body {
   margin: 0;
   font-family: "Sora", "Manrope", "Segoe UI", sans-serif;
-  background: #020617;
+  color: #eef5f5;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(9, 97, 106, 0.4), transparent 28%),
+    radial-gradient(circle at 82% 14%, rgba(13, 140, 149, 0.35), transparent 26%),
+    radial-gradient(circle at 74% 80%, rgba(26, 179, 181, 0.33), transparent 32%),
+    linear-gradient(160deg, #083c43 0%, #062a2f 100%);
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -35,6 +45,50 @@ body {
 
 .fade-in-up {
   animation: fadeInUp 280ms ease-out both;
+}
+
+.chat-markdown p {
+  margin: 0;
+}
+
+.chat-markdown pre,
+.chat-markdown code {
+  max-width: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.thinking-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.thinking-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tone-soft);
+  animation: pulseDot 900ms ease-in-out infinite;
+}
+
+.thinking-dots span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.thinking-dots span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+@keyframes pulseDot {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
 }
 
 @keyframes fadeInUp {

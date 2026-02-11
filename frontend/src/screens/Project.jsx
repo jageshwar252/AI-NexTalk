@@ -44,6 +44,8 @@ const Project = () => {
   const [isPeoplePanelOpen, setIsPeoplePanelOpen] = useState(false);
   const [isAddingCollaborators, setIsAddingCollaborators] = useState(false);
   const [error, setError] = useState('');
+  const [isAiThinking, setIsAiThinking] = useState(false);
+  const [showScrollDown, setShowScrollDown] = useState(false);
 
   const messageBoxRef = useRef(null);
 
@@ -84,12 +86,32 @@ const Project = () => {
     initializeSocket(project._id);
 
     const onProjectMessage = (data) => {
+      const shouldStickToBottom = (() => {
+        const box = messageBoxRef.current;
+        if (!box) return true;
+        return box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+      })();
+
       setMessages((prev) => [...prev, { ...data, type: 'incoming' }]);
+      if (data?.sender === 'AI') {
+        setIsAiThinking(false);
+      }
 
       const parsed = safeParseJsonFromMessage(data?.message);
       if (parsed?.fileTree) {
         setFileTree(parsed.fileTree);
       }
+
+      setTimeout(() => {
+        const box = messageBoxRef.current;
+        if (!box) return;
+        if (shouldStickToBottom) {
+          box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
+          setShowScrollDown(false);
+        } else {
+          setShowScrollDown(true);
+        }
+      }, 0);
     };
 
     receiveMessage('project-message', onProjectMessage);
@@ -100,9 +122,20 @@ const Project = () => {
   }, [project?._id]);
 
   useEffect(() => {
-    if (!messageBoxRef.current) return;
-    messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
-  }, [messages]);
+    const box = messageBoxRef.current;
+    if (!box) return;
+
+    const onScroll = () => {
+      const distance = box.scrollHeight - box.scrollTop - box.clientHeight;
+      setShowScrollDown(distance > 120);
+    };
+
+    box.addEventListener('scroll', onScroll);
+    onScroll();
+    return () => {
+      box.removeEventListener('scroll', onScroll);
+    };
+  }, []);
 
   useEffect(() => {
     if (!currentFile || !fileTree[currentFile]) return;
@@ -123,14 +156,24 @@ const Project = () => {
 
     sendMessage('project-message', newMessage);
     setMessages((prev) => [...prev, { ...newMessage, type: 'outgoing' }]);
+    if (/@ai/i.test(trimmed)) {
+      setIsAiThinking(true);
+    }
     setMessage('');
+
+    setTimeout(() => {
+      const box = messageBoxRef.current;
+      if (!box) return;
+      box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
+      setShowScrollDown(false);
+    }, 0);
   };
 
   const renderAIMessage = (rawMessage) => {
     const parsed = safeParseJsonFromMessage(rawMessage);
     const text = parsed?.text || rawMessage;
     return (
-      <div className="max-w-full overflow-x-auto">
+      <div className="chat-markdown max-h-64 max-w-full overflow-auto break-words">
         <Markdown>{text}</Markdown>
       </div>
     );
@@ -163,41 +206,41 @@ const Project = () => {
 
   if (isLoadingProject) {
     return (
-      <main className="min-h-screen bg-slate-950 text-slate-100">
+      <main className="min-h-screen bg-[#06353b] text-[#ecf3f3]">
         <div className="mx-auto grid min-h-screen max-w-5xl place-items-center px-4">
-          <p className="text-sm tracking-wide text-slate-300">Loading project...</p>
+          <p className="text-sm tracking-wide text-[#d7e5e6]">Loading project...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(34,211,238,0.18),transparent_30%),radial-gradient(circle_at_90%_10%,rgba(251,146,60,0.15),transparent_28%),radial-gradient(circle_at_85%_85%,rgba(110,231,183,0.12),transparent_30%)]" />
+    <main className="relative min-h-screen overflow-hidden bg-[#06353b] text-[#ecf3f3]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(250,92,92,0.28),transparent_30%),radial-gradient(circle_at_90%_10%,rgba(253,138,107,0.24),transparent_28%),radial-gradient(circle_at_85%_85%,rgba(254,194,136,0.2),transparent_30%)]" />
 
-      <section className="relative mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[1fr_360px]">
-        <div className="flex min-h-[85vh] flex-col rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl">
-          <header className="flex items-center justify-between border-b border-white/10 px-4 py-4 sm:px-6">
+      <section className="relative mx-auto grid h-[calc(100vh-2rem)] max-w-[1400px] grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[1fr_360px]">
+        <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-[#d3d3d355] bg-[#0a4c54cc] backdrop-blur-xl">
+          <header className="flex items-center justify-between border-b border-[#d3d3d344] px-4 py-4 sm:px-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/80">Workspace</p>
-              <h1 className="text-lg font-semibold text-white sm:text-xl">{project?.name || 'Project'}</h1>
+              <p className="text-xs uppercase tracking-[0.2em] text-[#d3d3d3]">Workspace</p>
+              <h1 className="text-lg font-semibold text-[#fff7df] sm:text-xl">{project?.name || 'Project'}</h1>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigate('/')}
-                className="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-semibold transition hover:bg-white/10"
+                className="rounded-lg border border-[#d3d3d388] px-3 py-1.5 text-xs font-semibold transition hover:bg-[#d3d3d322]"
               >
                 Back
               </button>
               <button
                 onClick={() => setIsCollaboratorModalOpen(true)}
-                className="rounded-lg bg-cyan-400 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300"
+                className="rounded-lg bg-[#1ab3b5] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#22bfc3]"
               >
                 Add Collaborator
               </button>
               <button
                 onClick={() => setIsPeoplePanelOpen((prev) => !prev)}
-                className="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-semibold transition hover:bg-white/10"
+                className="rounded-lg border border-[#d3d3d388] px-3 py-1.5 text-xs font-semibold transition hover:bg-[#d3d3d322]"
               >
                 Team
               </button>
@@ -205,17 +248,17 @@ const Project = () => {
           </header>
 
           {error && (
-            <div className="mx-4 mt-4 rounded-xl border border-rose-400/40 bg-rose-400/10 px-4 py-3 text-sm text-rose-200 sm:mx-6">
+            <div className="mx-4 mt-4 rounded-xl border border-[#1ab3b580] bg-[#1ab3b51c] px-4 py-3 text-sm text-[#e3eded] sm:mx-6">
               {error}
             </div>
           )}
 
-          <div className="grid min-h-0 flex-1 grid-cols-1 border-t border-white/5 lg:grid-cols-[260px_1fr]">
-            <aside className="border-b border-white/10 bg-slate-900/50 p-3 lg:border-b-0 lg:border-r">
-              <p className="mb-3 text-xs uppercase tracking-[0.2em] text-slate-300">Files</p>
+          <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden border-t border-[#d3d3d333] lg:grid-cols-[260px_1fr]">
+            <aside className="border-b border-[#d3d3d344] bg-[#083c43cc] p-3 lg:border-b-0 lg:border-r">
+              <p className="mb-3 text-xs uppercase tracking-[0.2em] text-[#d9e8e8]">Files</p>
               <div className="max-h-48 space-y-1 overflow-auto lg:max-h-[calc(100vh-280px)]">
                 {Object.keys(fileTree).length === 0 ? (
-                  <p className="text-sm text-slate-400">No generated files yet.</p>
+                  <p className="text-sm text-[#f5cda9]">No generated files yet.</p>
                 ) : (
                   Object.keys(fileTree).map((fileName) => (
                     <button
@@ -226,8 +269,8 @@ const Project = () => {
                       }}
                       className={`block w-full rounded-lg px-3 py-2 text-left text-sm transition ${
                         currentFile === fileName
-                          ? 'bg-cyan-400/20 text-cyan-100'
-                          : 'text-slate-200 hover:bg-white/10'
+                          ? 'bg-[#1ab3b533] text-[#f2f7f7]'
+                          : 'text-[#deecec] hover:bg-[#d3d3d322]'
                       }`}
                     >
                       {fileName}
@@ -237,11 +280,11 @@ const Project = () => {
               </div>
             </aside>
 
-            <section className="grid min-h-0 grid-rows-[1fr_auto]">
-              <div ref={messageBoxRef} className="min-h-0 space-y-3 overflow-auto p-4 sm:p-6">
+            <section className="relative grid min-h-0 overflow-hidden grid-rows-[1fr_auto]">
+              <div ref={messageBoxRef} className="min-h-0 space-y-3 overflow-y-auto overflow-x-hidden p-4 sm:p-6">
                 {messages.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-white/20 bg-white/5 p-4 text-sm text-slate-300">
-                    Start the conversation. Mention <span className="font-semibold text-cyan-200">@ai</span> to request generated code.
+                  <div className="rounded-xl border border-dashed border-[#d3d3d377] bg-[#d3d3d31f] p-4 text-sm text-[#d6e6e7]">
+                    Start the conversation. Mention <span className="font-semibold text-[#d3d3d3]">@ai</span> to request generated code.
                   </div>
                 ) : (
                   messages.map((msg, idx) => (
@@ -249,30 +292,54 @@ const Project = () => {
                       key={`${msg.sender}-${idx}`}
                       className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
                         msg.type === 'outgoing'
-                          ? 'ml-auto bg-cyan-400 text-slate-950'
-                          : 'bg-slate-800 text-slate-100'
+                          ? 'ml-auto bg-[#1ab3b5] text-white'
+                          : 'bg-[#402222] text-[#fff3df]'
                       }`}
                     >
                       <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] opacity-80">
                         {msg.sender}
                       </p>
-                      {msg.sender === 'AI' ? renderAIMessage(msg.message) : msg.message}
+                      <div className="max-h-64 overflow-auto whitespace-pre-wrap break-words">
+                        {msg.sender === 'AI' ? renderAIMessage(msg.message) : msg.message}
+                      </div>
                     </div>
                   ))
                 )}
+                {isAiThinking && (
+                  <div className="max-w-[70%] rounded-2xl bg-[#402222] px-4 py-3 text-sm text-[#fff3df]">
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] opacity-80">AI</p>
+                    <div className="flex items-center gap-2">
+                      <span>Thinking</span>
+                      <span className="thinking-dots"><span></span><span></span><span></span></span>
+                    </div>
+                  </div>
+                )}
               </div>
+              {showScrollDown && (
+                <button
+                  onClick={() => {
+                    const box = messageBoxRef.current;
+                    if (!box) return;
+                    box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
+                    setShowScrollDown(false);
+                  }}
+                  className="absolute bottom-24 right-6 rounded-full bg-[#22bfc3] px-4 py-2 text-xs font-semibold text-white shadow-lg transition hover:bg-[#1ab3b5]"
+                >
+                  Scroll Down
+                </button>
+              )}
 
               {currentFile && fileTree[currentFile] && (
-                <div className="border-t border-white/10 bg-slate-900/70">
-                  <div className="flex flex-wrap gap-2 border-b border-white/10 px-3 py-2">
+                <div className="border-t border-[#d3d3d344] bg-[#07373dd6]">
+                  <div className="flex flex-wrap gap-2 border-b border-[#d3d3d344] px-3 py-2">
                     {openFiles.map((fileName) => (
                       <button
                         key={fileName}
                         onClick={() => setCurrentFile(fileName)}
                         className={`rounded-md px-3 py-1 text-xs ${
                           currentFile === fileName
-                            ? 'bg-cyan-400/25 text-cyan-100'
-                            : 'bg-white/5 text-slate-200 hover:bg-white/10'
+                            ? 'bg-[#1ab3b555] text-[#f2f7f7]'
+                            : 'bg-[#d3d3d322] text-[#deecec] hover:bg-[#d3d3d333]'
                         }`}
                       >
                         {fileName}
@@ -287,8 +354,8 @@ const Project = () => {
                 </div>
               )}
 
-              <div className="border-t border-white/10 p-3 sm:p-4">
-                <div className="flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900/80 p-2">
+              <div className="border-t border-[#d3d3d344] p-3 sm:p-4">
+                <div className="flex items-center gap-2 rounded-2xl border border-[#d3d3d355] bg-[#07373dde] p-2">
                   <input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -300,11 +367,11 @@ const Project = () => {
                     }}
                     type="text"
                     placeholder="Type a message..."
-                    className="w-full bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-slate-400"
+                    className="w-full bg-transparent px-3 py-2 text-sm text-[#ecf3f3] outline-none placeholder:text-[#f6c9a4]"
                   />
                   <button
                     onClick={handleSend}
-                    className="rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+                    className="rounded-xl bg-[#22bfc3] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1ab3b5]"
                   >
                     Send
                   </button>
@@ -315,18 +382,18 @@ const Project = () => {
         </div>
 
         <aside
-          className={`rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl transition ${
+          className={`rounded-3xl border border-[#d3d3d355] bg-[#0a4c54cc] p-4 backdrop-blur-xl transition ${
             isPeoplePanelOpen ? 'opacity-100' : 'opacity-75'
           }`}
         >
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200/80">Collaborators</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#d3d3d3]">Collaborators</h2>
           <div className="mt-4 space-y-2">
             {(project?.users || []).map((member) => (
               <div
                 key={member._id}
-                className="rounded-xl border border-white/10 bg-slate-900/55 px-3 py-2 text-sm"
+                className="rounded-xl border border-[#d3d3d344] bg-[#083f46ca] px-3 py-2 text-sm"
               >
-                <p className="font-medium text-white">{member.email}</p>
+                <p className="font-medium text-[#f2f7f7]">{member.email}</p>
               </div>
             ))}
           </div>
@@ -334,13 +401,13 @@ const Project = () => {
       </section>
 
       {isCollaboratorModalOpen && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-slate-900/95 p-5">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-[#1d0f0fcc] p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl border border-[#d3d3d355] bg-[#0a4a52f2] p-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-white">Add Collaborators</h3>
+              <h3 className="text-xl font-semibold text-[#f2f7f7]">Add Collaborators</h3>
               <button
                 onClick={() => setIsCollaboratorModalOpen(false)}
-                className="rounded-md border border-white/20 px-2 py-1 text-xs text-slate-300 hover:bg-white/10"
+                className="rounded-md border border-[#d3d3d355] px-2 py-1 text-xs text-[#deecec] hover:bg-[#d3d3d322]"
               >
                 Close
               </button>
@@ -348,7 +415,7 @@ const Project = () => {
 
             <div className="mt-4 max-h-72 space-y-2 overflow-auto">
               {availableUsers.length === 0 ? (
-                <p className="text-sm text-slate-400">No additional users available.</p>
+                <p className="text-sm text-[#f3caa6]">No additional users available.</p>
               ) : (
                 availableUsers.map((person) => (
                   <button
@@ -356,8 +423,8 @@ const Project = () => {
                     onClick={() => toggleUserSelection(String(person._id))}
                     className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm transition ${
                       selectedUserIds.includes(String(person._id))
-                        ? 'border-emerald-300/60 bg-emerald-400/10 text-emerald-100'
-                        : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'
+                        ? 'border-[#d3d3d3] bg-[#d3d3d330] text-[#f3f6f6]'
+                        : 'border-[#d3d3d344] bg-[#d3d3d322] text-[#deecec] hover:bg-[#d3d3d338]'
                     }`}
                   >
                     <span>{person.email}</span>
@@ -370,14 +437,14 @@ const Project = () => {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setIsCollaboratorModalOpen(false)}
-                className="rounded-lg border border-white/20 px-4 py-2 text-sm text-slate-200 hover:bg-white/10"
+                className="rounded-lg border border-[#d3d3d355] px-4 py-2 text-sm text-[#deecec] hover:bg-[#d3d3d322]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddCollaborators}
                 disabled={!selectedUserIds.length || isAddingCollaborators}
-                className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:opacity-60"
+                className="rounded-lg bg-[#1ab3b5] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#22bfc3] disabled:opacity-60"
               >
                 {isAddingCollaborators ? 'Adding...' : 'Add'}
               </button>

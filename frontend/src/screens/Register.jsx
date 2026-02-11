@@ -30,27 +30,27 @@ const Register = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-10 text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(251,146,60,0.18),transparent_28%),radial-gradient(circle_at_85%_15%,rgba(45,212,191,0.2),transparent_30%),radial-gradient(circle_at_80%_80%,rgba(148,163,184,0.18),transparent_30%)]" />
+    <div className="relative min-h-screen overflow-hidden bg-[#06353b] px-4 py-10 text-[#eef6f6]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(9,97,106,0.45),transparent_28%),radial-gradient(circle_at_85%_15%,rgba(13,140,149,0.4),transparent_30%),radial-gradient(circle_at_80%_80%,rgba(26,180,181,0.36),transparent_30%)]" />
 
       <div className="relative mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-2">
-        <section className="hidden rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur-xl lg:block">
-          <p className="text-xs uppercase tracking-[0.3em] text-orange-200/80">AI NexTalk</p>
+        <section className="hidden rounded-3xl border border-[#d3d3d355] bg-[#0b4f57cc] p-10 backdrop-blur-xl lg:block">
+          <p className="text-xs uppercase tracking-[0.3em] text-[#d3d3d3]">AI NexTalk</p>
           <h1 className="mt-4 text-4xl font-semibold leading-tight">
             Spin up a new collaboration space in seconds
           </h1>
-          <p className="mt-4 text-slate-300">
+          <p className="mt-4 text-[#d5e4e5]">
             Register once, then manage projects, teams, and AI-assisted workflows from one place.
           </p>
         </section>
 
-        <section className="rounded-3xl border border-white/10 bg-slate-900/85 p-7 shadow-2xl backdrop-blur-xl sm:p-10">
+        <section className="rounded-3xl border border-[#d3d3d355] bg-[#0a4a52f0] p-7 shadow-2xl backdrop-blur-xl sm:p-10">
           <h2 className="text-3xl font-semibold">Create Account</h2>
-          <p className="mt-2 text-sm text-slate-300">Start building with your team today.</p>
+          <p className="mt-2 text-sm text-[#d8e6e7]">Start building with your team today.</p>
 
           <form onSubmit={submitHandler} className="mt-8 space-y-5">
             <div>
-              <label htmlFor="email" className="mb-2 block text-sm text-slate-200">
+              <label htmlFor="email" className="mb-2 block text-sm text-[#e3eded]">
                 Email
               </label>
               <input
@@ -58,13 +58,13 @@ const Register = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-white/15 bg-slate-900 px-4 py-2.5 text-sm outline-none transition focus:border-orange-300/60 focus:ring-2 focus:ring-orange-400/20"
+                className="w-full rounded-xl border border-[#d3d3d388] bg-[#083c43] px-4 py-2.5 text-sm outline-none transition focus:border-[#1ab3b5] focus:ring-2 focus:ring-[#1ab3b555]"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-2 block text-sm text-slate-200">
+              <label htmlFor="password" className="mb-2 block text-sm text-[#e3eded]">
                 Password
               </label>
               <input
@@ -72,13 +72,13 @@ const Register = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-white/15 bg-slate-900 px-4 py-2.5 text-sm outline-none transition focus:border-orange-300/60 focus:ring-2 focus:ring-orange-400/20"
+                className="w-full rounded-xl border border-[#d3d3d388] bg-[#083c43] px-4 py-2.5 text-sm outline-none transition focus:border-[#1ab3b5] focus:ring-2 focus:ring-[#1ab3b555]"
                 required
               />
             </div>
 
             {error && (
-              <div className="rounded-lg border border-rose-400/40 bg-rose-400/10 px-3 py-2 text-sm text-rose-200">
+              <div className="rounded-lg border border-[#d3d3d388] bg-[#d3d3d322] px-3 py-2 text-sm text-[#e6efef]">
                 {error}
               </div>
             )}
@@ -86,15 +86,15 @@ const Register = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-xl bg-orange-400 px-4 py-2.5 font-semibold text-slate-950 transition hover:bg-orange-300 disabled:opacity-60"
+              className="w-full rounded-xl bg-[#1ab3b5] px-4 py-2.5 font-semibold text-[#06353b] transition hover:bg-[#24c2c5] disabled:opacity-60"
             >
               {isSubmitting ? 'Creating...' : 'Create Account'}
             </button>
           </form>
 
-          <p className="mt-6 text-sm text-slate-300">
+          <p className="mt-6 text-sm text-[#d8e6e7]">
             Already registered?{' '}
-            <Link to="/login" className="font-semibold text-orange-300 hover:text-orange-200">
+            <Link to="/login" className="font-semibold text-[#d3d3d3] hover:text-white">
               Sign in
             </Link>
           </p>
