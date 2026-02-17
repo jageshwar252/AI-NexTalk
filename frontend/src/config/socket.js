@@ -1,8 +1,15 @@
 import socket from "socket.io-client";
 
 let socketInstance = null;
+const realtimeEnabled = import.meta.env.VITE_ENABLE_SOCKET === "true";
+
+export const isRealtimeEnabled = () => realtimeEnabled;
 
 export const initializeSocket = (projectId) => {
+    if (!realtimeEnabled) {
+        return null;
+    }
+
     if (socketInstance) {
         socketInstance.disconnect();
     }
@@ -14,6 +21,8 @@ export const initializeSocket = (projectId) => {
         query: {
             projectId: projectId,
         },
+        reconnection: false,
+        timeout: 5000,
     });
     return socketInstance;
 }

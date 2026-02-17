@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import projectModel from './models/project.model.js';
 import {generateResult} from './services/ai.service.js';
+import connectDB from './db/db.js';
 
 const server = http.createServer(app);
 
@@ -70,6 +71,13 @@ io.on('connection', socket => {
      });
 });
 
-server.listen(process.env.PORT || 3000, () => {
-    console.log(`Server on port ${process.env.PORT || 3000}`);
-});
+connectDB()
+    .then(() => {
+        server.listen(process.env.PORT || 3000, () => {
+            console.log(`Server on port ${process.env.PORT || 3000}`);
+        });
+    })
+    .catch((error) => {
+        console.error('Failed to connect MongoDB on startup:', error.message);
+        process.exit(1);
+    });

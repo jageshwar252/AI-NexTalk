@@ -24,13 +24,3 @@ services:
         sync: false
       - key: REDIS_PASSWORD
         sync: false
-
-  - type: static
-    name: ai-nextalk-frontend
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    autoDeploy: true
-    envVars:
-      - key: VITE_API_URL
-        sync: false

@@ -8,6 +8,7 @@ import { UserContext } from '../context/user-context';
 import {
   disconnectSocket,
   initializeSocket,
+  isRealtimeEnabled,
   receiveMessage,
   sendMessage,
 } from '../config/socket.js';
@@ -81,6 +82,7 @@ const Project = () => {
   }, [projectId, navigate]);
 
   useEffect(() => {
+    if (!isRealtimeEnabled()) return;
     if (!project?._id) return;
 
     initializeSocket(project._id);
@@ -154,11 +156,49 @@ const Project = () => {
       sender: user.email,
     };
 
-    sendMessage('project-message', newMessage);
+    const isAiMessage = /@ai/i.test(trimmed);
+    const realtimeEnabled = isRealtimeEnabled();
+
+    if (realtimeEnabled) {
+      sendMessage('project-message', newMessage);
+    }
     setMessages((prev) => [...prev, { ...newMessage, type: 'outgoing' }]);
-    if (/@ai/i.test(trimmed)) {
+
+    if (isAiMessage && !realtimeEnabled) {
+      setIsAiThinking(true);
+      axios
+        .get('/ai/get-result', {
+          params: { prompt: trimmed.replace(/@ai/i, '').trim() },
+        })
+        .then((res) => {
+          const aiMessage = {
+            sender: 'AI',
+            message: res.data,
+            type: 'incoming',
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+
+          const parsed = safeParseJsonFromMessage(res.data);
+          if (parsed?.fileTree) {
+            setFileTree(parsed.fileTree);
+          }
+        })
+        .catch((err) => {
+          setError(err.response?.data?.message || 'AI request failed.');
+        })
+        .finally(() => {
+          setIsAiThinking(false);
+          setTimeout(() => {
+            const box = messageBoxRef.current;
+            if (!box) return;
+            box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
+            setShowScrollDown(false);
+          }, 0);
+        });
+    } else if (isAiMessage) {
       setIsAiThinking(true);
     }
+
     setMessage('');
 
     setTimeout(() => {

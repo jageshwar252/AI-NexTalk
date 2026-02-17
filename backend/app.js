@@ -7,8 +7,6 @@ import aiRoutes from './routes/ai.routes.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
-connectDB()
-
 const app = express();
 
 app.use(cors())
@@ -16,6 +14,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cookieParser());
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        console.error('MongoDB connection error:', error.message);
+        res.status(503).json({ message: 'Database unavailable. Please try again.' });
+    }
+});
 
 app.use('/users', userRoutes);
 app.use('/projects', projectRoutes);
