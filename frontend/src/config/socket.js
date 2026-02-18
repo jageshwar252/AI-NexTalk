@@ -1,7 +1,8 @@
 import socket from "socket.io-client";
 
 let socketInstance = null;
-const realtimeEnabled = import.meta.env.VITE_ENABLE_SOCKET === "true";
+const realtimeEnabled = true;
+
 
 export const isRealtimeEnabled = () => realtimeEnabled;
 
