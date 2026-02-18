@@ -15,7 +15,7 @@ export const initializeSocket = (projectId) => {
         socketInstance.disconnect();
     }
 
-    socketInstance = socket(import.meta.env.VITE_API_URL, {
+    socketInstance = socket("https://ai-nextalk-backend.onrender.com", {
         auth: {
             token: localStorage.getItem("token"),
         },
